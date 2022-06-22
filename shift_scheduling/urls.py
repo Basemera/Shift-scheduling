@@ -21,10 +21,16 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
+from worker import urls as worker_urls
+from department import urls as department_urls
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include(user_urls)),
     path('token/', TokenObtainPairView.as_view()),
-    path('/token/refresh', TokenRefreshView.as_view())
+    path('/token/refresh', TokenRefreshView.as_view()),
+    path('worker/', include(worker_urls)),
+    path('department/', include(department_urls))
+
 ]

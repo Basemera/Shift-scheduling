@@ -42,7 +42,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'phonenumber_field',
     'users.apps.UsersConfig',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'scheduling.apps.SchedulingConfig',
+    'worker.apps.WorkerConfig',
+    'department.apps.DepartmentConfig'
 ]
 
 MIDDLEWARE = [
@@ -142,4 +145,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+}
+
+SIMPLE_JWT ={
+        'UPDATE_LAST_LOGIN': True
 }

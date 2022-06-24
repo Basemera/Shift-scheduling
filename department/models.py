@@ -6,4 +6,4 @@ from users.models import User
 
 class Department(models.Model):
     name = models.CharField('department_name', max_length=180)
-    manager = models.ForeignKey(User, on_delete=models.CASCADE, blank=False, null=False)
+    manager = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, null=False)

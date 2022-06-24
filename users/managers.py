@@ -16,15 +16,11 @@ class UserManager(BaseUserManager):
         # hashed_password = make_password(password)
         # print(hashed_password)
         user.set_password(password)
-        print(user.password)
         user.save(using=self._db)
-        print(user)
-
         return user
 
     def create(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        print(extra_fields)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):

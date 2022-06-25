@@ -17,6 +17,7 @@ class UserManager(BaseUserManager):
         # print(hashed_password)
         user.set_password(password)
         user.save(using=self._db)
+        print(user)
         return user
 
     def create(self, email, password=None, **extra_fields):

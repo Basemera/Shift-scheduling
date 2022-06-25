@@ -70,5 +70,5 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.user_type
     
     def is_supervisor_or_admin(self):
-        return self.user_type == 'Admin' or self.get_user_type == 'Supervisor'
+        return self.user_type == 'Admin' or self.get_user_type() == 'Supervisor'
 

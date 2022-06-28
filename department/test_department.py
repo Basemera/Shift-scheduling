@@ -188,3 +188,31 @@ class DepartmentRetrieveUpdateDestroyAPIViewTest(APITestCase):
                 "detail":"You do not have permission to perform this action."
             }
         )
+
+    def test_update_department_unsuccesful_when_user_not_supervisor(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+
+        response = self.client.delete(
+            '/department/1/',
+            format='json'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        self.assertEqual(dict_res, 
+            {
+                "detail":"You do not have permission to perform this action."
+            }
+        )
+
+    def test_delete_department_succesful_when_user_supervisor(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+
+        response = self.client.delete(
+            '/department/1/',
+            format='json'
+        )
+        dept = Department.objects.filter(pk=1)
+        
+        self.assertEqual(len(dept), 0)

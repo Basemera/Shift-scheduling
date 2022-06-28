@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 import pytest
 import json
+from rest_framework.test import APITestCase
 
 from .models import Worker
 
@@ -10,35 +11,14 @@ from users.models import User
 from department.models import Department
 
 # Create your tests here.
-class WorkerModelTest(TestCase):
+@pytest.mark.django_db()
+class WorkerModelTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        extra_fields = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
-            "user_type": "Supervisor"
-        }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
-
-        dept_fields = {
-            'name': 'engineering',
-            'manager': user
-        }
-        dept = Department.objects.create(**dept_fields)
-
-        extra_fields = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343453565",
-            "phone_number": "+256782607620",
-            "user_type": "Worker"
-        }
-        user = User.objects.create("worker@gmail.com", "password", **extra_fields)
+        return super().setUpTestData()
 
     def test_create_worker_successful(self):
-        dept = Department.objects.filter(name='engineering').first()
+        dept = Department.objects.filter(name='Engineering').first()
         user = User.objects.filter(email='worker@gmail.com').first()
         worker = Worker.objects.create(user=user, department=dept)
         self.assertEqual(worker.user, user)
@@ -51,32 +31,11 @@ class WorkerModelTest(TestCase):
             worker = Worker.objects.create(user=user, department=None)
 
 
-class WorkerCreateApiViewTest(TestCase):
+@pytest.mark.django_db()
+class WorkerCreateApiViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        extra_fields = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
-            "user_type": "Supervisor"
-        }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
-
-        dept_fields = {
-            'name': 'engineering',
-            'manager': user
-        }
-        dept = Department.objects.create(**dept_fields)
-
-        extra_fields2 = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343454465",
-            "phone_number": "+256772607610",
-            "user_type": "Worker"
-        }
-        user = User.objects.create("worker@gmail.com", "password", **extra_fields2)
+        return super().setUpTestData()
 
 
     def _login_user(self, email='admin@gmail.com'):
@@ -96,29 +55,21 @@ class WorkerCreateApiViewTest(TestCase):
         return dict_res
 
     def test_successfully_create_worker(self):
-        token = self._login_user()
-        auth_headers = {
-            'HTTP_AUTHORIZATION': "Bearer " + token,
-        }
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
         response = self.client.post(
             '/worker/',
             {
-	            "user": 1,
+	            "user": 3,
 	            "department": 1
             },
-            **auth_headers
         )
-        dict_res = self._make_decode_response(response)
-        self.assertEqual(dict_res, {
-            "user": 1,
+        self.assertEqual(response.data, {
+            "user": 3,
             "department": 1
         })
 
     def test_unsuccessfully_with_no_auth(self):
-        token = self._login_user()
-        auth_headers = {
-            'HTTP_AUTHORIZATION': "Bearer " + token,
-        }
         response = self.client.post(
             '/worker/',
             {
@@ -130,48 +81,24 @@ class WorkerCreateApiViewTest(TestCase):
         self.assertEqual(dict_res, {'detail': 'Authentication credentials were not provided.'})
 
     def test_unsuccessfully_when_logged_in_not_supervisor(self):
-        token = self._login_user('worker@gmail.com')
-        auth_headers = {
-            'HTTP_AUTHORIZATION': "Bearer " + token,
-        }
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
         response = self.client.post(
             '/worker/',
             {
 	            "user": 1,
 	            "department": 1
             },
-            **auth_headers
         )
         dict_res = self._make_decode_response(response)
         self.assertEqual(dict_res, {"detail": "You do not have permission to perform this action."})
 
-class WorkerListApiViewTest(TestCase):
+@pytest.mark.django_db()
+class WorkerListApiViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        extra_fields = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
-            "user_type": "Supervisor"
-        }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
+        return super().setUpTestData()
 
-        dept_fields = {
-            'name': 'engineering',
-            'manager': user
-        }
-        dept = Department.objects.create(**dept_fields)
-
-        extra_fields2 = {
-            "first_name": "Phiona",
-            "last_name": "Basemera",
-            "nin": "12343454465",
-            "phone_number": "+256772607610",
-            "user_type": "Worker"
-        }
-        user1 = User.objects.create("worker@gmail.com", "password", **extra_fields2)
-        Worker.objects.create(department=dept,user=user1)
    
     def _login_user(self, email='admin@gmail.com'):
         token = self.client.post(
@@ -191,13 +118,76 @@ class WorkerListApiViewTest(TestCase):
 
 
     def test_successfully_get_workers(self):
-        token = self._login_user('worker@gmail.com')
-        auth_headers = {
-            'HTTP_AUTHORIZATION': "Bearer " + token,
-        }
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
         response = self.client.get(
             '/worker/',
-            **auth_headers
         )
         response = self._make_decode_response(response)
-        self.assertEqual(response, [{"user":2,"department":1}])
+        self.assertEqual(response, [{"user":3,"department":1}])
+
+@pytest.mark.django_db()
+class WorkerRetrieveUpdateDestroyAPIViewTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        return super().setUpTestData()
+    def test_get_worker(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/worker/1'
+        )
+        self.assertEqual(
+            response.data,
+            {
+                "department": 1,
+	            "user": 3
+            }
+        )
+        
+    def test_update_worker_succesful(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        old_worker = Worker.objects.get(pk=1)
+
+        response = self.client.put(
+            '/worker/1',
+            {
+               "user": 3,
+	            "department": 2
+            },
+            format='json'
+        )
+        worker = Worker.objects.get(pk=1)
+        self.assertEqual(worker.department.id, 2)
+        self.assertNotEqual(worker.department.id, old_worker.department.id)
+
+    # def test_update_worker_unsuccesful_when_user_not_supervisor(self):
+    #     user = User.objects.get(pk=3)
+    #     self.client.force_authenticate(user)
+
+    #     response = self.client.put(
+    #         '/worker/1',
+    #         {
+    #            "user": 3,
+	#             "department": 2
+    #         },
+    #         format='json'
+    #     )
+    #     res = response.content.decode('utf-8')
+    #     dict_res = json.loads(res)
+    #     self.assertEqual(dict_res, 
+    #         {
+    #             "detail":"You do not have permission to perform this action."
+    #         }
+    #     )
+    def test_delete_worker_succesful_when_user_supervisor(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.delete(
+            '/worker/1',
+            format='json'
+        )
+        worker = Worker.objects.filter(pk=1)
+        self.assertEqual(len(worker), 0)
+

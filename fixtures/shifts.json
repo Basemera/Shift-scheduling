@@ -1,0 +1,25 @@
+[
+    {
+        "model": "shift.Shift",
+        "pk":1,
+        "fields": {
+            "assigned_by": 2,
+            "completed": false,
+            "shift_day": "2022-06-28",
+            "time": 1,
+            "full": false
+        }
+    },
+    {
+        "model": "shift.Shift",
+        "pk":2,
+        "fields": {
+            "assigned_by": 2,
+            "completed": false,
+            "shift_day": "2022-07-28",
+            "time": 1,
+            "full": false
+            
+        }
+    }
+]

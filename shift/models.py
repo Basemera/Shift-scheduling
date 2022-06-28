@@ -23,3 +23,6 @@ class Shift(models.Model):
 class WorkerSchedule(models.Model):
     shift = models.ForeignKey(Shift, on_delete=models.PROTECT, blank=False)
     worker = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
+    clocked_in = models.DateTimeField(blank=True, null=True)
+    clocked_out = models.DateTimeField(blank=True, null=True)
+

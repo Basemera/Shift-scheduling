@@ -6,7 +6,7 @@ class ShiftSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shift
-        fields = ('assigned_by', 'completed', 'shift_day', 'time', 'full')
+        fields = ('assigned_by', 'completed', 'shift_day', 'time', 'full','id')
 
     def validate_shift_day(self, value):
         if value < datetime.date(datetime.now()):
@@ -16,6 +16,17 @@ class ShiftSerializer(serializers.ModelSerializer):
 
         
 class WorkerScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkerSchedule
+        fields = ('worker', 'shift', 'clocked_in', 'clocked_out')
+
+class ShiftSerializerWithoutAssignedByField(serializers.ModelSerializer):
+
+    class Meta:
+        model = Shift
+        fields = ('completed', 'shift_day', 'time', 'full','id')
+
+class WorkerScheduleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift')

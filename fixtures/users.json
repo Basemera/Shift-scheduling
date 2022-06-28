@@ -46,6 +46,36 @@
             "is_active": true,
             "date_joined": "2022-06-01"
         }
+    },
+    {
+        "model": "users.User",
+        "pk": 3,
+        "fields": {
+            "first_name": "Work",
+            "last_name": "Working",
+            "nin": "12343454319",
+            "phone_number": "+256781407700",
+            "user_type": "Worker",
+            "email": "worker@gmail.com",
+            "password":"password",
+            "is_active": true,
+            "date_joined": "2022-06-01"
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 4,
+        "fields": {
+            "first_name": "Work2",
+            "last_name": "Working2",
+            "nin": "12343456319",
+            "phone_number": "+256781400700",
+            "user_type": "Worker",
+            "email": "worker2@gmail.com",
+            "password":"password",
+            "is_active": true,
+            "date_joined": "2022-06-01"
+        }
     }
     
 ]

@@ -23,6 +23,7 @@ from rest_framework_simplejwt.views import (
 )
 from worker import urls as worker_urls
 from department import urls as department_urls
+from shift import urls as shift_urls
 
 
 urlpatterns = [
@@ -31,6 +32,6 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view()),
     path('/token/refresh', TokenRefreshView.as_view()),
     path('worker/', include(worker_urls)),
-    path('department/', include(department_urls))
-
+    path('department/', include(department_urls)),
+    path('schedule/', include(shift_urls))
 ]

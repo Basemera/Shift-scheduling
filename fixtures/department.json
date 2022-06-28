@@ -1,0 +1,18 @@
+[
+    {
+        "model": "department.Department",
+        "pk":1,
+        "fields": {
+            "name":"Engineering",
+            "manager":2
+        }
+    },
+    {
+        "model": "department.Department",
+        "pk":2,
+        "fields": {
+            "name":"Design",
+            "manager":2
+        }
+    }
+]

@@ -1,0 +1,51 @@
+[
+    {
+        "model": "users.User",
+        "pk": 1,
+        "fields": {
+            "first_name": "Phiona",
+            "last_name": "Basemera",
+            "nin": "12343454565",
+            "phone_number": "+256782607610",
+            "user_type": "Admin",
+            "email": "admin@gmail.com",
+            "password":"password",
+            "is_active": true,
+            "date_joined": "2022-06-01"
+
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 2,
+        "fields": {
+            "first_name": "Rach",
+            "last_name": "Logose",
+            "nin": "12343454559",
+            "phone_number": "+256782607700",
+            "user_type": "Supervisor",
+            "email": "rach@gmail.com",
+            "password":"password",
+            "is_active": true,
+            "date_joined": "2022-06-01"
+
+
+        }
+    },
+    {
+        "model": "users.User",
+        "pk": 3,
+        "fields": {
+            "first_name": "Phie",
+            "last_name": "Bas",
+            "nin": "12343454519",
+            "phone_number": "+256782407700",
+            "user_type": "Worker",
+            "email": "phie@gmail.com",
+            "password":"password",
+            "is_active": true,
+            "date_joined": "2022-06-01"
+        }
+    }
+    
+]

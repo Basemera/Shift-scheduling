@@ -1,0 +1,23 @@
+[
+    {
+        "model": "shift.ShiftTime",
+        "pk": 1,
+        "fields": {
+            "time": "0-8"
+        }
+    },
+    {
+        "model": "shift.ShiftTime",
+        "pk": 2,
+        "fields": {
+            "time": "8-16"
+        }
+    },
+    {
+        "model": "shift.ShiftTime",
+        "pk": 3,
+        "fields": {
+            "time": "16-24"
+        }
+    }
+]

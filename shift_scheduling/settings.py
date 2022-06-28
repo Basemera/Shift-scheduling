@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,7 +47,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'scheduling.apps.SchedulingConfig',
     'worker.apps.WorkerConfig',
-    'department.apps.DepartmentConfig'
+    'department.apps.DepartmentConfig',
+    'shift.apps.ShiftConfig'
+
 ]
 
 MIDDLEWARE = [
@@ -148,5 +152,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT ={
-        'UPDATE_LAST_LOGIN': True
+        'UPDATE_LAST_LOGIN': True,
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+
 }

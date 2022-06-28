@@ -1,6 +1,5 @@
 from enum import Enum
 from django.db import models
-from django.db import models
 from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -29,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField('last name', max_length=30, blank=True)
     nin = models.CharField('nin', max_length=30, blank=True, unique=True)
     phone_number = PhoneNumberField('phone number', blank=True, unique=True)
-    date_joined = models.DateTimeField('date joined', auto_now_add=True)
+    date_joined = models.DateTimeField('date joined', auto_now_add=True, blank=True)
     is_active = models.BooleanField('active', default=True)
     # user_type = models.Choices(value=((i.name, i.value) for i in UserTypeChoice))
     user_type = models.CharField(max_length=300, choices=UserTypeChoice.choices())

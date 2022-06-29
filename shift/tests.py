@@ -2,8 +2,9 @@ from django.test import TestCase
 import pytest
 from rest_framework.test import APITestCase
 import json
-from shift.models import Shift
+from shift.models import Shift, WorkerSchedule
 from users.models import User
+import datetime
 # Create your tests here.
 pytest.mark.django_db()
 class ShiftCreateApiViewTest(APITestCase):
@@ -195,3 +196,119 @@ class TestWorkerSchedule(APITestCase):
         self.assertEqual(dict_res[1], {
             'worker': ['Invalid pk "44" - object does not exist.']
         })
+
+@pytest.mark.django_db()
+class TestWorkScheduleRetrieveUpdateDestroyAPIView(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        return super().setUpTestData()
+
+    def test_retrieve_worker_schedule(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/schedule/worker/1'
+        )
+        self.assertEqual(response.data, {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": None,
+            "clocked_out": None
+        })
+
+    def test_update_worker_schedule_fails_when_clocked_in_none(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/worker/1',
+            {
+                "worker":3,
+                "shift":1,
+                "clocked_in": None,
+                "clocked_out": "2022-06-28"
+            },
+            format='json'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        self.assertEqual(dict_res, 
+            {
+                "non_field_errors": [
+                        "Clocking out cannot happen before clocking in."
+                    ]
+            }
+        )
+
+    def test_update_worker_schedule_clockin_successful(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/worker/1',
+            {
+                "worker":3,
+                "shift":1,
+                "clocked_in": '2022-06-28',
+                "clocked_out": None
+            },
+            format='json'
+        )
+        date = datetime.datetime.strptime('2022-06-28 00:00:00', '%Y-%m-%d %H:%M:%S')
+        
+        self.assertEqual(response.data, {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": '2022-06-28T00:00:00Z',
+            "clocked_out": None
+        })
+
+    def test_update_worker_schedule_clockout_successful(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/worker/1',
+            {
+                "worker":3,
+                "shift":1,
+                "clocked_in": '2022-06-28',
+                "clocked_out": '2022-06-28'
+            },
+            format='json'
+        )
+        date = datetime.datetime.strptime('2022-06-28 00:00:00', '%Y-%m-%d %H:%M:%S')
+        
+        self.assertEqual(response.data, {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": '2022-06-28T00:00:00Z',
+            "clocked_out": '2022-06-28T00:00:00Z'
+        })
+
+    def test_delete_worker_schedule_succesful_when_user_supervisor(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.delete(
+            '/schedule/worker/1',
+            format='json'
+        )
+        schedule = WorkerSchedule.objects.filter(pk=1)
+        self.assertEqual(len(schedule), 0)
+
+    def test_delete_worker_schedule_unsuccesful_when_shift_completed(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        shift = Shift.objects.get(pk=1)
+        shift.completed = True
+        shift.save()
+        response = self.client.delete(
+            '/schedule/worker/1',
+            format='json'
+        )
+        schedule = WorkerSchedule.objects.filter(pk=1)
+        self.assertEqual(len(schedule), 1)
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        self.assertEqual(dict_res, 
+            {
+                "message":"Cannot delete an entry from a completed shift"
+            }
+        )

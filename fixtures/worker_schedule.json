@@ -1,0 +1,22 @@
+[
+    {
+        "model": "shift.WorkerSchedule",
+        "pk": 1,
+        "fields": {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": null,
+            "clocked_out": null
+        }
+    },
+    {
+        "model": "shift.WorkerSchedule",
+        "pk": 2,
+        "fields": {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": null,
+            "clocked_out": null
+        }
+    }
+]

@@ -10,3 +10,4 @@ def django_db_setup(django_db_setup, django_db_blocker):
         call_command('loaddata', 'fixtures/worker.json')
         call_command('loaddata', 'fixtures/time.json')
         call_command('loaddata', 'fixtures/shifts.json')
+        call_command('loaddata', 'fixtures/worker_schedule.json')

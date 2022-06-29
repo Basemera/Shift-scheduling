@@ -1,4 +1,3 @@
-from codecs import ignore_errors
 from django.shortcuts import render
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -48,7 +47,6 @@ class WorkerShceduleCreateListApiView(ListCreateAPIView):
     serializer_class = WorkerScheduleSerializer
     queryset = WorkerSchedule.objects.all()
     def get_serializer_class(self):
-        print(self.request.method)
         if self.request.method in ["POST"]:
             return WorkerScheduleCreateSerializer
         return self.serializer_class
@@ -62,8 +60,11 @@ class WorkerShceduleCreateListApiView(ListCreateAPIView):
         l = []
         if isinstance(request.data.get('worker'), list):
             d = {}
-            print(request.data.get('worker'))
+            shift = Shift.objects.get(pk=shift_id)
+            schedule = WorkerSchedule.objects.filter(shift_shift_day=shift.shift_day)
             for i in request.data.get('worker'):
+                shift = Shift.objects.get(pk=shift_id)
+                schedule = WorkerSchedule.objects.filter(shift__shift_day=shift.shift_day, worker=i)
                 l.append(
                     {
                         "worker": i,
@@ -75,6 +76,11 @@ class WorkerShceduleCreateListApiView(ListCreateAPIView):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        shift = Shift.objects.get(pk=shift_id)
+        schedule = WorkerSchedule.objects.filter(shift__shift_day=shift.shift_day, worker=request.data.get('worker'))
+        if len(schedule) != 0:
+            return Response({"message":"User already has assigned shift"}, status=status.HTTP_400_BAD_REQUEST)
         return super().create(request, *args, **kwargs)
 
 class WorkScheduleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):

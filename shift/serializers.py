@@ -35,7 +35,7 @@ class WorkerScheduleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift')
-        read_only_fields = ('clocked_in', 'clocked_out', 'shift')
+        read_only_fields = ('clocked_in', 'clocked_out')
 
 # def validate_clocked_out(clocked_in, clocked_out):
 #         if clocked_out < clocked_in:

@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'scheduling.apps.SchedulingConfig',
     'worker.apps.WorkerConfig',
     'department.apps.DepartmentConfig',
-    'shift.apps.ShiftConfig'
+    'shift.apps.ShiftConfig',
+    'django_filters'
 
 ]
 
@@ -149,6 +150,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    # 'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
+
+
 }
 
 SIMPLE_JWT ={

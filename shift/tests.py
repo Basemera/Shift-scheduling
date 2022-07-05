@@ -312,3 +312,61 @@ class TestWorkScheduleRetrieveUpdateDestroyAPIView(APITestCase):
                 "message":"Cannot delete an entry from a completed shift"
             }
         )
+
+
+class WorkerScheduleSearchApiViewTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        return super().setUpTestData()
+    def test_search_successful(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/schedule/search/?department_name=Engineering'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        # print(dict_res)
+        for result in dict_res:
+            self.assertEqual(
+                json.loads((result['worker']))['department'],
+                'Engineering'
+            )
+
+    def test_search_successful_with_multiple_filters(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/schedule/search/?department_name=Engineering&shift__completed=true'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        for result in dict_res:
+            self.assertEqual(
+                json.loads((result['worker']))['department'],
+                'Engineering'
+            )
+            self.assertEqual(
+                json.loads((result['shift']))['completed'],
+                True
+            )
+
+    def test_search_returns_empty_with_unsupported_filter_fields(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/schedule/search/?unsupporetd_field=say'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        self.assertEqual(dict_res, [])
+
+    def test_search_returns_empty_when_no_fields_passed_in(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
+        response = self.client.get(
+            '/schedule/search/'
+        )
+        res = response.content.decode('utf-8')
+        dict_res = json.loads(res)
+        self.assertEqual(dict_res, [])

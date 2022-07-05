@@ -3,7 +3,7 @@
         "model": "shift.WorkerSchedule",
         "pk": 1,
         "fields": {
-            "worker": 3,
+            "worker": 1,
             "shift": 1,
             "clocked_in": null,
             "clocked_out": null
@@ -13,8 +13,8 @@
         "model": "shift.WorkerSchedule",
         "pk": 2,
         "fields": {
-            "worker": 3,
-            "shift": 1,
+            "worker": 1,
+            "shift": 2,
             "clocked_in": null,
             "clocked_out": null
         }

@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+import csv
+from django.http import HttpResponse
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from shift.models import Shift, WorkerSchedule
 from worker.models import Worker
@@ -8,7 +10,7 @@ from .serializers import ShiftSerializer, ShiftSerializerWithoutAssignedByField,
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes as permission_class_decorator
-
+from .filters import WorkerScheduleFilter 
 # Create your views here.
 class ShiftCreateApiView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, SupervisorAllActions]
@@ -99,3 +101,70 @@ class WorkScheduleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             if shift.completed:
                 return Response({"message":"Cannot delete an entry from a completed shift"})
         return super().delete(request, *args, **kwargs)
+
+class WorkerScheduleSearchApiView(ListAPIView):
+    # permission_classes = [IsAuthenticated]
+    serializer_class = WorkerScheduleSerializer
+    filterset_class = WorkerScheduleFilter
+
+    queryset = WorkerSchedule.objects.all()
+    def get_queryset(self):
+        # print(self.request.GET)
+
+        if not bool(self.request.GET):
+            return WorkerSchedule.objects.none()
+        query_params = self.request.GET
+        non_supported_field = []
+        for i in query_params:
+            if i not in self.filterset_class.get_filters():
+                non_supported_field.append(i)
+                # return WorkerSchedule.objects.none()
+        if len(query_params) == len(non_supported_field):
+            return WorkerSchedule.objects.none()
+        return WorkerSchedule.objects.all()
+
+class WorkerScheduleDownloadApiView(ListAPIView):
+    # permission_classes = [IsAuthenticated]
+    serializer_class = WorkerScheduleSerializer
+    filterset_class = WorkerScheduleFilter
+
+    queryset = WorkerSchedule.objects.all()
+    def get_queryset(self):
+        # print(self.request.GET)
+
+        if not bool(self.request.GET):
+            return WorkerSchedule.objects.none()
+        query_params = self.request.GET
+        non_supported_field = []
+        for i in query_params:
+            if i not in self.filterset_class.get_filters():
+                non_supported_field.append(i)
+                # return WorkerSchedule.objects.none()
+        if len(query_params) == len(non_supported_field):
+            return WorkerSchedule.objects.none()
+        return WorkerSchedule.objects.all()
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="worker_schedule.csv"'},
+            )
+        writer = csv.writer(response)
+        k = (list(queryset.values()))
+        row_1 = (list(k[0].keys()))
+        writer.writerow(row_1)
+        for i in (queryset.values()):
+            print(type(i.values()))
+            print(list(i.values()))
+            row = []
+            for p in list(i.values()):
+                if (isinstance(p, int)):
+                    row.append(str(p))
+                else:
+                    row.append(p)
+            writer.writerow(
+                row
+            )            
+        return response

@@ -16,14 +16,18 @@ class ShiftSerializer(serializers.ModelSerializer):
 
         
 class WorkerScheduleSerializer(serializers.ModelSerializer):
-    shift = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field='shift_day'
-    )
+    # shift = serializers.SlugRelatedField(
+    #     many=False,
+    #     read_only=True,
+    #     slug_field='shift_day'
+    # )
+    shift = serializers.StringRelatedField()
+    worker = serializers.StringRelatedField()
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift', 'clocked_in', 'clocked_out')
+        read_only_fields = ('shift__assigned_by',)
+        depth = 3
 
 class ShiftSerializerWithoutAssignedByField(serializers.ModelSerializer):
 
@@ -57,4 +61,6 @@ class WorkerScheduleUpdateSerializer(serializers.ModelSerializer):
             message = 'Clocking out cannot happen before clocking in.'
             raise serializers.ValidationError(message)
         return data
+
+# class WorkerScheduleListSerializer(serializers.)
     

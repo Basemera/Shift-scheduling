@@ -1,14 +1,20 @@
 import json
 from operator import mod
 from django.db import models
-from enum import Enum
-
+from datetime import datetime, timedelta, date
 from users.models import User
 from worker.models import Worker
 # Create your models here.
 
 class ShiftTime(models.Model):
     time = models.CharField('Shift Time', max_length=30, unique=True)
+    def get_shift_time(self):
+        if self.time == '0-8':
+            return 8
+        elif self.time == '8-16':
+            return 16
+        else:
+            return 24
     def __str__(self) -> str:
         d = {
             # 'id': self.id,
@@ -29,6 +35,12 @@ class Shift(models.Model):
     def shift_time(self):
         return self.time.time
 
+    def shift_start_time(self):        
+        shift_day = self.shift_day
+        previous_day = shift_day - timedelta(days=1)
+        midnight = datetime.combine(previous_day, datetime.min.time())
+        return midnight + timedelta(hours=8)
+
     def __str__(self) -> str:
         d = {
             'id': self.id,
@@ -46,3 +58,18 @@ class WorkerSchedule(models.Model):
     clocked_in = models.DateTimeField(blank=True, null=True)
     clocked_out = models.DateTimeField(blank=True, null=True)
 
+    def clocked_in_time(self):
+        current_time = datetime.now()
+
+        if current_time < self.shift.shift_start_time():
+            return False
+            return self.shift.shift_start_time() #reverrt to false
+        return self.shift.shift_start_time()
+
+    def clockout_time(self):
+        current_time = datetime.now()
+
+        if current_time < self.shift.shift_start_time() + timedelta(hours=8):
+            return False
+            return self.shift.shift_start_time() + timedelta(hours=8)  # revert to false
+        return self.shift.shift_start_time() + timedelta(hours=8)

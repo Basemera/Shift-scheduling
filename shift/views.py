@@ -1,15 +1,15 @@
-from django.shortcuts import render
 import csv
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from shift.models import Shift, WorkerSchedule
 from worker.models import Worker
 from worker.permissions import SupervisorAllActions
-from .serializers import ShiftSerializer, ShiftSerializerWithoutAssignedByField, WorkerScheduleCreateSerializer, WorkerScheduleSerializer, WorkerScheduleUpdateSerializer
+from .serializers import WorkerScheduleClockinSerializer, ShiftSerializer, ShiftSerializerWithoutAssignedByField, WorkerScheduleCreateSerializer, WorkerScheduleSerializer, WorkerScheduleUpdateSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes as permission_class_decorator
+from rest_framework.decorators import permission_classes as permission_class_decorator
 from .filters import WorkerScheduleFilter 
 # Create your views here.
 class ShiftCreateApiView(ListCreateAPIView):
@@ -109,8 +109,6 @@ class WorkerScheduleSearchApiView(ListAPIView):
 
     queryset = WorkerSchedule.objects.all()
     def get_queryset(self):
-        # print(self.request.GET)
-
         if not bool(self.request.GET):
             return WorkerSchedule.objects.none()
         query_params = self.request.GET
@@ -118,20 +116,17 @@ class WorkerScheduleSearchApiView(ListAPIView):
         for i in query_params:
             if i not in self.filterset_class.get_filters():
                 non_supported_field.append(i)
-                # return WorkerSchedule.objects.none()
         if len(query_params) == len(non_supported_field):
             return WorkerSchedule.objects.none()
         return WorkerSchedule.objects.all()
 
 class WorkerScheduleDownloadApiView(ListAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = WorkerScheduleSerializer
     filterset_class = WorkerScheduleFilter
 
     queryset = WorkerSchedule.objects.all()
     def get_queryset(self):
-        # print(self.request.GET)
-
         if not bool(self.request.GET):
             return WorkerSchedule.objects.none()
         query_params = self.request.GET
@@ -139,7 +134,6 @@ class WorkerScheduleDownloadApiView(ListAPIView):
         for i in query_params:
             if i not in self.filterset_class.get_filters():
                 non_supported_field.append(i)
-                # return WorkerSchedule.objects.none()
         if len(query_params) == len(non_supported_field):
             return WorkerSchedule.objects.none()
         return WorkerSchedule.objects.all()
@@ -152,12 +146,12 @@ class WorkerScheduleDownloadApiView(ListAPIView):
             headers={'Content-Disposition': 'attachment; filename="worker_schedule.csv"'},
             )
         writer = csv.writer(response)
+        if 'fields' in self.request.GET:
+            pass # to be implemented
         k = (list(queryset.values()))
         row_1 = (list(k[0].keys()))
         writer.writerow(row_1)
         for i in (queryset.values()):
-            print(type(i.values()))
-            print(list(i.values()))
             row = []
             for p in list(i.values()):
                 if (isinstance(p, int)):
@@ -168,3 +162,54 @@ class WorkerScheduleDownloadApiView(ListAPIView):
                 row
             )            
         return response
+
+class ShiftClockinAPIView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WorkerScheduleClockinSerializer
+    queryset = WorkerSchedule.objects.all()
+    multiple_lookup_fields = ['shift', 'worker']
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        time_str_format = '%Y-%m-%d %H:%M:%S'
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if instance.worker.user.id != user.id:
+            return Response({"message":"Unauthorised"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if (request.data.get('action') == 'clockin'):
+            shift_time = instance.clocked_in_time()
+
+            if not shift_time:
+                return Response({"message":"Cannot clockin to shift that has not started"}, status=status.HTTP_400_BAD_REQUEST)
+            data = {
+                    "clocked_in" : shift_time.strftime(time_str_format)
+            }
+        elif (request.data.get('action') == 'clockout'):
+            shift_end_time = instance.clockout_time()
+
+            if not shift_end_time :
+                return Response({"message":"Cannot clockout to shift that has not started"}, status=status.HTTP_400_BAD_REQUEST)
+            data = {
+                    "clocked_out" : shift_end_time.strftime(time_str_format)
+            }
+        else:
+            return Response({"message":"Missing required arguments"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        return Response(serializer.data)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = {}
+        for field in self.multiple_lookup_fields:
+            filter[field] = self.kwargs[field]
+
+        obj = get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, obj)
+        return obj

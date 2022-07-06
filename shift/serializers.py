@@ -16,11 +16,6 @@ class ShiftSerializer(serializers.ModelSerializer):
 
         
 class WorkerScheduleSerializer(serializers.ModelSerializer):
-    # shift = serializers.SlugRelatedField(
-    #     many=False,
-    #     read_only=True,
-    #     slug_field='shift_day'
-    # )
     shift = serializers.StringRelatedField()
     worker = serializers.StringRelatedField()
     class Meta:
@@ -40,18 +35,10 @@ class WorkerScheduleCreateSerializer(serializers.ModelSerializer):
         model = WorkerSchedule
         fields = ('worker', 'shift')
         read_only_fields = ('clocked_in', 'clocked_out')
-
-# def validate_clocked_out(clocked_in, clocked_out):
-#         if clocked_out < clocked_in:
-#             message = 'Clocking out cannot happen before clocking in.' % clocked_in
-#             raise serializers.ValidationError(message)
 class WorkerScheduleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift', 'clocked_in', 'clocked_out')
-        # validator = [
-        #     validate_clocked_out('clocked_in', 'clocked_out')
-        # ]
     def validate(self, data):
         if data['clocked_in'] and data['clocked_out']:
             if data['clocked_out'] < data['clocked_in']:
@@ -62,5 +49,15 @@ class WorkerScheduleUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message)
         return data
 
-# class WorkerScheduleListSerializer(serializers.)
-    
+class WorkerScheduleClockinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkerSchedule
+        extra_kwargs = {
+            'clocked_in': {'required': False},
+            'clocked_out': {'required': False},
+            'shift': {'required': False},
+            'worker': {'required': False}
+            }
+        fields = ['shift', 'worker','clocked_in', 'clocked_out']
+        read_only_fields = ['shift', 'worker']
+ 

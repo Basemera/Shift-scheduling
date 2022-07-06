@@ -61,3 +61,15 @@ class WorkerScheduleClockinSerializer(serializers.ModelSerializer):
         fields = ['shift', 'worker','clocked_in', 'clocked_out']
         read_only_fields = ['shift', 'worker']
  
+class WorkerScheduleWorkerLogHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkerSchedule
+        fields = ('worker', 'shift', 'clocked_in', 'clocked_out')
+        read_only_fields = ('shift__assigned_by',)
+        depth = 1
+
+    def validate(self, data):
+        if data['end'] < data['start']:
+            message = 'Clocking out cannot happen before clocking in.'
+            raise serializers.ValidationError(message)
+        return data

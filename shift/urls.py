@@ -1,11 +1,14 @@
-from django.urls import path
+from django.urls import path, re_path
+
 from .views import (
     ShiftCreateApiView,
     ShiftRetrieveUpdateDestroyAPIView,
     WorkerShceduleCreateListApiView,
     WorkScheduleRetrieveUpdateDestroyAPIView,
     WorkerScheduleSearchApiView,
-    ShiftClockinAPIView
+    ShiftClockinAPIView,
+    WorkerScheduleWorkerLogHoursApiView,
+    WorkerScheduleDownloadApiView
 )
 
 urlpatterns = [
@@ -14,5 +17,8 @@ urlpatterns = [
     path('worker/', WorkerShceduleCreateListApiView.as_view()),
     path('worker/<pk>', WorkScheduleRetrieveUpdateDestroyAPIView.as_view()),
     path('search/', WorkerScheduleSearchApiView.as_view()),
-    path('<worker>/clockin/<shift>', ShiftClockinAPIView.as_view())
+    path('<worker>/clockin/<shift>', ShiftClockinAPIView.as_view()),
+    path('hours/', WorkerScheduleWorkerLogHoursApiView.as_view()),
+    path('download/', WorkerScheduleDownloadApiView.as_view())
+
 ]

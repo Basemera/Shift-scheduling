@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from shift.models import Shift, WorkerSchedule
 from worker.models import Worker
 from worker.permissions import SupervisorAllActions
-from .serializers import WorkerScheduleClockinSerializer, ShiftSerializer, ShiftSerializerWithoutAssignedByField, WorkerScheduleCreateSerializer, WorkerScheduleSerializer, WorkerScheduleUpdateSerializer
+from .serializers import WorkerScheduleClockinSerializer, ShiftSerializer, ShiftSerializerWithoutAssignedByField, WorkerScheduleCreateSerializer, WorkerScheduleSerializer, WorkerScheduleUpdateSerializer, WorkerScheduleWorkerLogHoursSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import permission_classes as permission_class_decorator
@@ -121,7 +121,6 @@ class WorkerScheduleSearchApiView(ListAPIView):
         return WorkerSchedule.objects.all()
 
 class WorkerScheduleDownloadApiView(ListAPIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = WorkerScheduleSerializer
     filterset_class = WorkerScheduleFilter
 
@@ -213,3 +212,13 @@ class ShiftClockinAPIView(RetrieveUpdateDestroyAPIView):
         obj = get_object_or_404(queryset, **filter)
         self.check_object_permissions(self.request, obj)
         return obj
+
+class WorkerScheduleWorkerLogHoursApiView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WorkerScheduleWorkerLogHoursSerializer
+    filterset_class = WorkerScheduleFilter
+    def get_queryset(self):
+        start_date = self.request.GET['start']
+        end_date = self.request.GET['end']
+        qs = WorkerSchedule.objects.filter(shift__shift_day__range=(start_date, end_date))
+        return qs

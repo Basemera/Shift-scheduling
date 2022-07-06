@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'worker.apps.WorkerConfig',
     'department.apps.DepartmentConfig',
     'shift.apps.ShiftConfig',
-    'django_filters'
+    'django_filters',
+   'drf_yasg',
+
 
 ]
 
@@ -161,4 +163,17 @@ SIMPLE_JWT ={
         'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
         'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 
+}
+
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Basic': {
+            'type': 'basic'
+      },
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
 }

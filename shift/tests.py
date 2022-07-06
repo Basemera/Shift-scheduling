@@ -362,11 +362,106 @@ class WorkerScheduleSearchApiViewTest(APITestCase):
         self.assertEqual(dict_res, [])
 
     def test_search_returns_empty_when_no_fields_passed_in(self):
-        user = User.objects.get(pk=2)
-        self.client.force_authenticate(user)
         response = self.client.get(
             '/schedule/search/'
         )
         res = response.content.decode('utf-8')
         dict_res = json.loads(res)
         self.assertEqual(dict_res, [])
+
+class WorkerScheduleDownloadApiViewTest(APITestCase):
+    def setUp(self) -> None:
+        return super().setUp()
+
+    def test_successful_download(self):
+        response = self.client.get(
+            '/schedule/download/?department_name=Engineering'
+        )
+
+        self.assertEqual(
+            response.get('Content-Disposition'), 'attachment; filename="worker_schedule.csv"'
+        )
+
+class ShiftClockinAPIViewTest(APITestCase):
+    def setUp(self) -> None:
+        return super().setUp()
+
+    @pytest.mark.freeze_time('2022-06-28')
+    def test_successful_clockin(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/1/clockin/1',
+            {
+                "action": "clockin"
+            },
+            format='json'
+        )
+        
+        data = {
+            "shift":1,
+            "worker":1,
+            "clocked_in": '2022-06-27T08:00:00Z',
+            "clocked_out": None
+        }
+
+        self.assertEqual(response.data, data)
+
+    @pytest.mark.freeze_time('2022-06-26')
+    def test_unsuccessful_clockin_when_shift_has_not_started(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/1/clockin/1',
+            {
+                "action": "clockin"
+            },
+            format='json'
+        )
+        self.assertEqual(response.data, {'message': 'Cannot clockin to shift that has not started'})
+
+    
+    @pytest.mark.freeze_time('2022-07-29')
+    def test_successful_clockout(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/1/clockin/2',
+            {
+                "action": "clockout"
+            },
+            format='json'
+        )
+        
+        data = {
+            "shift":2,
+            "worker":1,
+            "clocked_in": '2022-07-27T00:00:00Z',
+            "clocked_out": '2022-07-27T08:00:00Z'
+        }
+        self.assertEqual(response.data, data)
+
+    @pytest.mark.freeze_time('2022-06-26')
+    def test_unsuccessful_clockout_when_shift_has_not_started(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/1/clockin/1',
+            {
+                "action": "clockout"
+            },
+            format='json'
+        )
+        self.assertEqual(response.data, {'message': 'Cannot clockout to shift that has not started'})
+
+    def test_unsuccessful_with_invalid_input(self):
+        user = User.objects.get(pk=3)
+        self.client.force_authenticate(user)
+        response = self.client.put(
+            '/schedule/1/clockin/1',
+            {
+                "action": "logs"
+            },
+            format='json'
+        )
+        self.assertEqual(response.data, {'message': 'Missing required arguments'})

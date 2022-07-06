@@ -39,7 +39,12 @@ class Shift(models.Model):
         shift_day = self.shift_day
         previous_day = shift_day - timedelta(days=1)
         midnight = datetime.combine(previous_day, datetime.min.time())
-        return midnight + timedelta(hours=8)
+        if self.time.time == '0-8':
+            return midnight + timedelta(hours=0)
+        elif self.time.time == '8-16':
+            return midnight + timedelta(hours=8)
+        elif self.time.time == '16-24':
+            return midnight + timedelta(hours=16)
 
     def __str__(self) -> str:
         d = {
@@ -69,7 +74,7 @@ class WorkerSchedule(models.Model):
     def clockout_time(self):
         current_time = datetime.now()
 
-        if current_time < self.shift.shift_start_time() + timedelta(hours=8):
+        if current_time < self.shift.shift_start_time() + timedelta(hours=8) or self.clocked_in == None:
             return False
             return self.shift.shift_start_time() + timedelta(hours=8)  # revert to false
         return self.shift.shift_start_time() + timedelta(hours=8)

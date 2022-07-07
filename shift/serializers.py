@@ -21,8 +21,9 @@ class WorkerScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift', 'clocked_in', 'clocked_out')
-        read_only_fields = ('shift__assigned_by',)
+        read_only_fields = ('shift__assigned_by','shift__shift_day')
         depth = 3
+
 
 class ShiftSerializerWithoutAssignedByField(serializers.ModelSerializer):
 
@@ -35,6 +36,7 @@ class WorkerScheduleCreateSerializer(serializers.ModelSerializer):
         model = WorkerSchedule
         fields = ('worker', 'shift')
         read_only_fields = ('clocked_in', 'clocked_out')
+
 class WorkerScheduleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
@@ -49,6 +51,7 @@ class WorkerScheduleUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(message)
         return data
 
+
 class WorkerScheduleClockinSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerSchedule
@@ -60,8 +63,10 @@ class WorkerScheduleClockinSerializer(serializers.ModelSerializer):
             }
         fields = ['shift', 'worker','clocked_in', 'clocked_out']
         read_only_fields = ['shift', 'worker']
- 
+
+
 class WorkerScheduleWorkerLogHoursSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = WorkerSchedule
         fields = ('worker', 'shift', 'clocked_in', 'clocked_out')

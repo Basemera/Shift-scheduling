@@ -21,7 +21,7 @@ class ShiftCreateApiViewTest(APITestCase):
                 "time": 1,
                 "shift_day": "2022-07-28",
                 "completed": False,
-                "full": False
+                "full": False,
             },
             format='json'
         )
@@ -31,7 +31,8 @@ class ShiftCreateApiViewTest(APITestCase):
                 'completed': False,
                 'shift_day': '2022-07-28',
                 'time': 1,
-                'full': False
+                'full': False,
+                "id": 3
             }
         )
 
@@ -93,7 +94,7 @@ class ShiftRetrieveUpdateDestroyAPIViewTest(APITestCase):
             "assigned_by":2,
             "completed":False,
             "shift_day":"2022-06-28",
-            "time":1,
+            "time":2,
             "full":False,
             "id":1
         })
@@ -144,10 +145,10 @@ class ShiftRetrieveUpdateDestroyAPIViewTest(APITestCase):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
         response = self.client.delete(
-            '/schedule/shift/1',
+            '/schedule/shift/3',
             format='json'
         )
-        shift = Shift.objects.filter(pk=1)
+        shift = Shift.objects.filter(pk=3)
         self.assertEqual(len(shift), 0)
 
 @pytest.mark.django_db()
@@ -210,7 +211,7 @@ class TestWorkScheduleRetrieveUpdateDestroyAPIView(APITestCase):
             '/schedule/worker/1'
         )
         self.assertEqual(response.data, {
-            "worker": 3,
+            "worker": 1,
             "shift": 1,
             "clocked_in": None,
             "clocked_out": None
@@ -337,7 +338,7 @@ class WorkerScheduleSearchApiViewTest(APITestCase):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
         response = self.client.get(
-            '/schedule/search/?department_name=Engineering&shift__completed=true'
+            '/schedule/search/?department_name=Engineering&shift_completed=true'
         )
         res = response.content.decode('utf-8')
         dict_res = json.loads(res)
@@ -362,6 +363,8 @@ class WorkerScheduleSearchApiViewTest(APITestCase):
         self.assertEqual(dict_res, [])
 
     def test_search_returns_empty_when_no_fields_passed_in(self):
+        user = User.objects.get(pk=2)
+        self.client.force_authenticate(user)
         response = self.client.get(
             '/schedule/search/'
         )

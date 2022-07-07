@@ -7,11 +7,14 @@ from .models import Department
 from worker.permissions import SupervisorAllActions
 # Create your views here.
 class DepartmentApiCreateListView(ListCreateAPIView):
+    """Create department and list departments"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = DepartmentSerializer
     queryset = Department.objects.all()
 
+
 class DepartmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve single department instance, update and delete department"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = DepartmentSerializer
     queryset = Department.objects.all()

@@ -15,20 +15,16 @@ class UserSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(
         validators=[UniqueValidator(queryset=User.objects.all())]
     )
-    # password = serializers.
 
     def validate_nin(self, value):
+        # to be implemented
         return value
-
-        if 'django' not in value.lower():
-            raise serializers.ValidationError("Blog post is not about Django")
-        return value
-        pass
     class Meta:
         model = User
-        fields = ('nin', 'phone_number', 'email', 'first_name', 'last_name', 'user_type')
+        fields = ('nin', 'phone_number', 'email', 'first_name', 'last_name', 'user_type', 'password')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
-            'phone_number': {'required': True}
+            'phone_number': {'required': True},
+            'password': {'write_only': True, 'required':True}
         }

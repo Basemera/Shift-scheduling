@@ -1,5 +1,4 @@
-from django.urls import path, re_path
-
+from django.urls import path
 from .views import (
     ShiftCreateApiView,
     ShiftRetrieveUpdateDestroyAPIView,
@@ -20,5 +19,4 @@ urlpatterns = [
     path('<worker>/clockin/<shift>', ShiftClockinAPIView.as_view()),
     path('hours/', WorkerScheduleWorkerLogHoursApiView.as_view()),
     path('download/', WorkerScheduleDownloadApiView.as_view())
-
 ]

@@ -4,7 +4,6 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from phonenumber_field.modelfields import PhoneNumberField
-
 from .managers import UserManager
 # Create your models here.
 
@@ -30,7 +29,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = PhoneNumberField('phone number', blank=True, unique=True)
     date_joined = models.DateTimeField('date joined', auto_now_add=True, blank=True)
     is_active = models.BooleanField('active', default=True)
-    # user_type = models.Choices(value=((i.name, i.value) for i in UserTypeChoice))
     user_type = models.CharField(max_length=300, choices=UserTypeChoice.choices())
 
 
@@ -52,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         '''
-        Returns the short name for the user.
+        Returns the first name for the user.
         '''
         return self.first_name
 
@@ -73,5 +71,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return '%d: %s' % (self.id, self.email)
-        return super().__str__()
-

@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from shift.models import Shift, ShiftTime, WorkerSchedule
 
 # Register your models here.

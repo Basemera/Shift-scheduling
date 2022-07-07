@@ -1,14 +1,11 @@
-from django.test import TestCase
-from django.db import IntegrityError
 import pytest
 import json
-from rest_framework.test import force_authenticate
-from .views import ListCreateAPIView
+from django.db import IntegrityError
 from rest_framework.test import APITestCase
-
 # Create your tests here.
 from users.models import User
 from .models import Department
+
 
 @pytest.mark.django_db()
 class DepartmentModelTest(APITestCase):
@@ -27,7 +24,6 @@ class DepartmentModelTest(APITestCase):
         with pytest.raises(IntegrityError, match='null value in column "name"') as excInfo:
             dept = Department.objects.create(name=None, manager=user)
 
-        
 
 @pytest.mark.django_db()
 class DepartmentCreateApiViewTest(APITestCase):
@@ -93,6 +89,7 @@ class DepartmentCreateApiViewTest(APITestCase):
         dict_res = json.loads(res)
         self.assertEqual(dict_res, {"detail": "You do not have permission to perform this action."})
 
+
 @pytest.mark.django_db()
 class DepartmentListApiViewTest(APITestCase):
 
@@ -135,11 +132,13 @@ class DepartmentListApiViewTest(APITestCase):
         response = self._make_decode_response(response)
         self.assertEqual(response, {'detail': 'Authentication credentials were not provided.'})
 
+
 @pytest.mark.django_db()
 class DepartmentRetrieveUpdateDestroyAPIViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         return super().setUpTestData()
+
     def test_get_department(self):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)

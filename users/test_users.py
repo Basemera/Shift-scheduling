@@ -1,10 +1,9 @@
-from django.db import IntegrityError
-from django.test import TestCase, client
-# from psycopg2 import IntegrityError
 import pytest
 import json
-
+from django.db import IntegrityError
+from django.test import TestCase
 from users.models import User
+
 
 # Create your tests here.
 class UserModelTest(TestCase):
@@ -13,13 +12,13 @@ class UserModelTest(TestCase):
         extra_fields = {
             "first_name": "Phiona",
             "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
+            "nin": "22343454565",
+            "phone_number": "+256702607610",
             "user_type": "Admin"
         }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
-
+        user = User.objects.create("test@gmail.com", "password", **extra_fields)
         return super().setUpTestData()
+
     def test_create_user_model(self):
         extra_fields = {
             "first_name": "Phiona",
@@ -59,13 +58,13 @@ class UserModelTest(TestCase):
             "user_type": "Admin"
         }
         with pytest.raises(IntegrityError):
-            user = User.objects.create("admin@gmail.com", "password", **extra_fields)
+            user = User.objects.create("test@gmail.com", "password", **extra_fields)
 
     def test_create_user_fails_with_missing_fields(self):
         extra_fields = {
             "first_name": "Phiona",
             "last_name": "Basemera",
-            "nin": "12343454565",
+            "nin": "22343454565",
             "phone_number": "+256782607600",
             "user_type": "Admin"
         }
@@ -78,27 +77,27 @@ class UserLoginTest(TestCase):
         extra_fields = {
             "first_name": "Phiona",
             "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
+            "nin": "22343454565",
+            "phone_number": "+256702607610",
             "user_type": "Admin"
         }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
+        user = User.objects.create("test@gmail.com", "password", **extra_fields)
 
     def test_user_login(self):
-        response = self.client.login(email='admin@gmail.com', password='password')
-        user = User.objects.filter(email='admin@gmail.com').first()
+        response = self.client.login(email='test@gmail.com', password='password')
+        user = User.objects.filter(email='test@gmail.com').first()
         self.assertEqual(response, True)
         self.assertEqual(self.client.session['_auth_user_id'], str(user.id))
 
     def test_user_login_fails(self):
-        response = self.client.login(email='admin@gmail.com', password='welcome')
+        response = self.client.login(email='test@gmail.com', password='welcome')
         self.assertEqual(response, False)
 
     def test_user_login_json(self):
         response = self.client.post(
             '/token/',
             {
-                "email": 'admin@gmail.com',
+                "email": 'test@gmail.com',
                 "password" : "password"
             }
         )
@@ -111,7 +110,7 @@ class UserLoginTest(TestCase):
         response = self.client.post(
             '/token/',
             {
-                "email": 'admin@gmail.com',
+                "email": 'test@gmail.com',
                 "password" : "welcome"
             }
         )
@@ -123,7 +122,7 @@ class UserLoginTest(TestCase):
         response = self.client.post(
             '/token/',
             {
-                "email": 'admin@gmail.com',
+                "email": 'test@gmail.com',
             }
         )
         res = response.content.decode('utf-8')
@@ -147,11 +146,11 @@ class UserListViewTest(TestCase):
         extra_fields = {
             "first_name": "Phiona",
             "last_name": "Basemera",
-            "nin": "12343454565",
-            "phone_number": "+256782607610",
+            "nin": "22343454565",
+            "phone_number": "+256702607610",
             "user_type": "Admin"
         }
-        user = User.objects.create("admin@gmail.com", "password", **extra_fields)
+        user = User.objects.create("test@gmail.com", "password", **extra_fields)
         extra_fields2 = {
             "first_name": "Phiona",
             "last_name": "Basemera",
@@ -165,22 +164,14 @@ class UserListViewTest(TestCase):
         response = self.client.get('/user/')
         res = response.content.decode('utf-8')
         dict_res = json.loads(res)
-        self.assertEqual(len(dict_res), 2)
-        self.assertDictEqual(dict_res[0], {
-            "nin":"12343454565",
-            "phone_number":"+256782607610",
-            "email":"admin@gmail.com",
-            "first_name":"Phiona",
-            "last_name":"Basemera",
-            "user_type":"Admin"
-            })
-        self.assertDictEqual(dict_res[1], {
-            "nin":"12343454665",
-            "phone_number":"+256782707610",
-            "email":"normol_user@gmail.com",
-            "first_name":"Phiona",
-            "last_name":"Basemera",
-            "user_type":"Worker"
-            })
-
-
+        self.assertEqual(len(dict_res), 6)
+        for user in dict_res:
+            if user['email'] == 'test@gmail.com':
+                self.assertDictEqual(user, {
+                    "nin":"22343454565",
+                    "phone_number":"+256702607610",
+                    "email":"test@gmail.com",
+                    "first_name":"Phiona",
+                    "last_name":"Basemera",
+                    "user_type":"Admin"
+                    })

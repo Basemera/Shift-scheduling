@@ -6,5 +6,29 @@
             "user": 3,
             "department": 1
         }
+    },
+    {
+        "model": "worker.Worker",
+        "pk": 2,
+        "fields": {
+            "user": 3,
+            "department": 1
+        }
+    },
+    {
+        "model": "worker.Worker",
+        "pk": 3,
+        "fields": {
+            "user": 3,
+            "department": 1
+        }
+    },
+    {
+        "model": "worker.Worker",
+        "pk": 4,
+        "fields": {
+            "user": 3,
+            "department": 1
+        }
     }
 ]

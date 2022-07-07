@@ -21,5 +21,17 @@
             "full": false
             
         }
+    },
+    {
+        "model": "shift.Shift",
+        "pk":3,
+        "fields": {
+            "assigned_by": 2,
+            "completed": true,
+            "shift_day": "2022-07-28",
+            "time": 1,
+            "full": false
+            
+        }
     }
 ]

@@ -18,5 +18,25 @@
             "clocked_in": "2022-07-27T00:00:00Z",
             "clocked_out": null
         }
+    },
+    {
+        "model": "shift.WorkerSchedule",
+        "pk": 3,
+        "fields": {
+            "worker": 3,
+            "shift": 1,
+            "clocked_in": null,
+            "clocked_out": null
+        }
+    },
+    {
+        "model": "shift.WorkerSchedule",
+        "pk": 4,
+        "fields": {
+            "worker": 4,
+            "shift": 1,
+            "clocked_in": null,
+            "clocked_out": null
+        }
     }
 ]

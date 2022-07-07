@@ -1,5 +1,4 @@
 import json
-from operator import mod
 from django.db import models
 from datetime import datetime, timedelta, date
 from users.models import User
@@ -16,12 +15,9 @@ class ShiftTime(models.Model):
         else:
             return 24
     def __str__(self) -> str:
-        d = {
-            # 'id': self.id,
-            # 'shift_day': self.shift_day,
-            'time': self.time
-        }
         return '%d: %s'%(self.id, self.time)
+
+
 class Shift(models.Model):
     assigned_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, related_name='Supervisor')
     completed = models.BooleanField(blank=True, default=False)
@@ -55,7 +51,7 @@ class Shift(models.Model):
             'completed':self.completed
         }
         return '%s'% (json.dumps(d, indent = 4, sort_keys = True, default = str))
-        return super().__str__()
+
 
 class WorkerSchedule(models.Model):
     shift = models.ForeignKey(Shift, on_delete=models.PROTECT, blank=False)
@@ -68,7 +64,6 @@ class WorkerSchedule(models.Model):
 
         if current_time < self.shift.shift_start_time():
             return False
-            return self.shift.shift_start_time() #reverrt to false
         return self.shift.shift_start_time()
 
     def clockout_time(self):
@@ -76,5 +71,4 @@ class WorkerSchedule(models.Model):
 
         if current_time < self.shift.shift_start_time() + timedelta(hours=8) or self.clocked_in == None:
             return False
-            return self.shift.shift_start_time() + timedelta(hours=8)  # revert to false
         return self.shift.shift_start_time() + timedelta(hours=8)

@@ -1,12 +1,8 @@
 import json
-from django.db import IntegrityError
-from django.test import TestCase
 import pytest
-import json
+from django.db import IntegrityError
 from rest_framework.test import APITestCase
-
 from .models import Worker
-
 from users.models import User
 from department.models import Department
 
@@ -36,7 +32,6 @@ class WorkerCreateApiViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         return super().setUpTestData()
-
 
     def _login_user(self, email='admin@gmail.com'):
         token = self.client.post(
@@ -99,7 +94,6 @@ class WorkerListApiViewTest(APITestCase):
     def setUpTestData(cls) -> None:
         return super().setUpTestData()
 
-   
     def _login_user(self, email='admin@gmail.com'):
         token = self.client.post(
             '/token/',
@@ -116,7 +110,6 @@ class WorkerListApiViewTest(APITestCase):
         dict_res = json.loads(res)
         return dict_res
 
-
     def test_successfully_get_workers(self):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
@@ -131,6 +124,7 @@ class WorkerRetrieveUpdateDestroyAPIViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         return super().setUpTestData()
+
     def test_get_worker(self):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
@@ -144,7 +138,7 @@ class WorkerRetrieveUpdateDestroyAPIViewTest(APITestCase):
 	            "user": 3
             }
         )
-        
+
     def test_update_worker_succesful(self):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
@@ -162,25 +156,6 @@ class WorkerRetrieveUpdateDestroyAPIViewTest(APITestCase):
         self.assertEqual(worker.department.id, 2)
         self.assertNotEqual(worker.department.id, old_worker.department.id)
 
-    # def test_update_worker_unsuccesful_when_user_not_supervisor(self):
-    #     user = User.objects.get(pk=3)
-    #     self.client.force_authenticate(user)
-
-    #     response = self.client.put(
-    #         '/worker/1',
-    #         {
-    #            "user": 3,
-	#             "department": 2
-    #         },
-    #         format='json'
-    #     )
-    #     res = response.content.decode('utf-8')
-    #     dict_res = json.loads(res)
-    #     self.assertEqual(dict_res, 
-    #         {
-    #             "detail":"You do not have permission to perform this action."
-    #         }
-    #     )
     def test_delete_worker_succesful_when_user_supervisor(self):
         user = User.objects.get(pk=2)
         self.client.force_authenticate(user)
@@ -190,4 +165,3 @@ class WorkerRetrieveUpdateDestroyAPIViewTest(APITestCase):
         )
         worker = Worker.objects.filter(pk=1)
         self.assertEqual(len(worker), 0)
-

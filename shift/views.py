@@ -1,18 +1,29 @@
 import csv
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from shift.models import Shift, WorkerSchedule
-from worker.models import Worker
-from worker.permissions import SupervisorAllActions
-from .serializers import WorkerScheduleClockinSerializer, ShiftSerializer, ShiftSerializerWithoutAssignedByField, WorkerScheduleCreateSerializer, WorkerScheduleSerializer, WorkerScheduleUpdateSerializer, WorkerScheduleWorkerLogHoursSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import permission_classes as permission_class_decorator
-from .filters import WorkerScheduleFilter 
+from shift.models import Shift, WorkerSchedule
+from worker.models import Worker
+from worker.permissions import SupervisorAllActions
+from .serializers import (
+    WorkerScheduleClockinSerializer,
+    ShiftSerializer,
+    ShiftSerializerWithoutAssignedByField,
+    WorkerScheduleCreateSerializer, 
+    WorkerScheduleSerializer,
+    WorkerScheduleUpdateSerializer,
+    WorkerScheduleWorkerLogHoursSerializer
+)
+
+from .filters import WorkerScheduleFilter
+
 # Create your views here.
 class ShiftCreateApiView(ListCreateAPIView):
+    """Create a shift and list all shifts"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = ShiftSerializer
     queryset = Shift.objects.all()
@@ -30,7 +41,9 @@ class ShiftCreateApiView(ListCreateAPIView):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
 class ShiftRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update and delete a single shift"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = ShiftSerializer
     queryset = Shift.objects.all()
@@ -44,7 +57,9 @@ class ShiftRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             return ShiftSerializerWithoutAssignedByField
         return self.serializer_class
 
+
 class WorkerShceduleCreateListApiView(ListCreateAPIView):
+    """Create worker schedule and list all worker schedules"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = WorkerScheduleSerializer
     queryset = WorkerSchedule.objects.all()
@@ -63,7 +78,7 @@ class WorkerShceduleCreateListApiView(ListCreateAPIView):
         if isinstance(request.data.get('worker'), list):
             d = {}
             shift = Shift.objects.get(pk=shift_id)
-            schedule = WorkerSchedule.objects.filter(shift_shift_day=shift.shift_day)
+            schedule = WorkerSchedule.objects.filter(shift__shift_day=shift.shift_day)
             for i in request.data.get('worker'):
                 shift = Shift.objects.get(pk=shift_id)
                 schedule = WorkerSchedule.objects.filter(shift__shift_day=shift.shift_day, worker=i)
@@ -80,12 +95,14 @@ class WorkerShceduleCreateListApiView(ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
         shift = Shift.objects.get(pk=shift_id)
-        schedule = WorkerSchedule.objects.filter(shift__shift_day=shift.shift_day, worker=request.data.get('worker'))
+        schedule = WorkerSchedule.objects.filter(shift__shift_shift_day=shift.shift_day, worker=request.data.get('worker'))
         if len(schedule) != 0:
             return Response({"message":"User already has assigned shift"}, status=status.HTTP_400_BAD_REQUEST)
         return super().create(request, *args, **kwargs)
 
+
 class WorkScheduleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrive, update and delete single worker schedule"""
     permission_classes = [IsAuthenticated, SupervisorAllActions]
     serializer_class = WorkerScheduleUpdateSerializer
     queryset = WorkerSchedule.objects.all()
@@ -102,8 +119,10 @@ class WorkScheduleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 return Response({"message":"Cannot delete an entry from a completed shift"})
         return super().delete(request, *args, **kwargs)
 
+
 class WorkerScheduleSearchApiView(ListAPIView):
-    # permission_classes = [IsAuthenticated]
+    """Filter worker schedules"""
+    permission_classes = [IsAuthenticated]
     serializer_class = WorkerScheduleSerializer
     filterset_class = WorkerScheduleFilter
 
@@ -120,11 +139,13 @@ class WorkerScheduleSearchApiView(ListAPIView):
             return WorkerSchedule.objects.none()
         return WorkerSchedule.objects.all()
 
+
 class WorkerScheduleDownloadApiView(ListAPIView):
+    """Download filter results"""
     serializer_class = WorkerScheduleSerializer
     filterset_class = WorkerScheduleFilter
-
     queryset = WorkerSchedule.objects.all()
+
     def get_queryset(self):
         if not bool(self.request.GET):
             return WorkerSchedule.objects.none()
@@ -162,7 +183,9 @@ class WorkerScheduleDownloadApiView(ListAPIView):
             )            
         return response
 
+
 class ShiftClockinAPIView(RetrieveUpdateDestroyAPIView):
+    """Clockin and clockout"""
     permission_classes = [IsAuthenticated]
     serializer_class = WorkerScheduleClockinSerializer
     queryset = WorkerSchedule.objects.all()
@@ -214,6 +237,7 @@ class ShiftClockinAPIView(RetrieveUpdateDestroyAPIView):
         return obj
 
 class WorkerScheduleWorkerLogHoursApiView(ListAPIView):
+    """Get the hours a worker logged in a given time range"""
     permission_classes = [IsAuthenticated]
     serializer_class = WorkerScheduleWorkerLogHoursSerializer
     filterset_class = WorkerScheduleFilter

@@ -29,4 +29,5 @@ Create an application that csan be used to schedule worker shifts.
 - Add linting with `eslint`
 - Add a job that runs daily to complete all overdue shifts that are not completed
 - Add functionality to create reports showing the hours a worker logged during a certain period
+- Improve the filtering option so filters can either be exact, contains, greater than, less than, equal to and not only the default
 
